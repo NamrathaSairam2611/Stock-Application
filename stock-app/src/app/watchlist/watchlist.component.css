@@ -1,0 +1,81 @@
+.card-container {
+  display: flex;
+  flex-direction: column;
+  margin: 2rem auto auto auto;
+  width: 70%;
+}
+
+@media (max-width: 400px) {
+  .card-container {
+    width: 95%;
+    margin: 3%;
+  }
+  .watchlist-text {
+    margin: 8% 0;
+  }
+}
+
+.card {
+  margin: 0.6rem 0;
+  border: 1px solid #ccc;
+  padding: 0.6rem 0.6rem 1rem 0.6rem;
+  position: relative;
+}
+
+.close {
+  position: absolute;
+  top: 5px;
+  left: 5px;
+  cursor: pointer;
+
+  padding: 0.5rem 0.7rem;
+  font-size: 0.6rem;
+  border-radius: 3px;
+}
+
+.close:hover {
+  border: 1px solid black;
+}
+
+.half {
+  width: 50%; /* Adjust width as needed */
+}
+
+.content {
+  display: flex; /* Keep flexbox properties */
+  justify-content: space-between; /* Adjust alignment as needed */
+  margin-top: 2rem;
+}
+
+.empty-watchlist {
+  padding: 10px;
+  background-color: #ffefc4;
+  border: 1px solid #ffefc4;
+  border-radius: 4px;
+  font-size: 0.7rem;
+  text-align: center;
+  margin-top: 3%;
+}
+
+.watchlist-content {
+  margin-top: 3%;
+}
+
+.footer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+}
+
+.custom-navbar-footer-bg {
+  background-color: #e8e4e4;
+}
+
+.footer-content {
+  color: black;
+  font-family: "Heebo", sans-serif;
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 0.2rem;
+}

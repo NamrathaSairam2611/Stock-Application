@@ -1,0 +1,55 @@
+<div>
+  <div class="card-container">
+    <h2 class="watchlist-text">My Watchlist</h2>
+
+    <div class="watchlist-content col-lg-12 col-sm-12">
+      <div *ngIf="!isLoading && watchlist.length === 0" class="empty-watchlist">
+        Currently, you don't have any stock in your watchlist.
+      </div>
+      <div *ngIf="isLoading" style="text-align: center">
+        <mat-progress-spinner
+          mode="indeterminate"
+          diameter="40"
+        ></mat-progress-spinner>
+      </div>
+      <div class="col-md-12">
+        <div class="card" *ngFor="let item of watchlist">
+          <div class="close" (click)="removeWatchlist(item)">X</div>
+          <div class="content" (click)="navigateToSearch(item.symbol)">
+            <div class="half">
+              <h3>{{ item.symbol }}</h3>
+              <div>{{ item.name }}</div>
+            </div>
+            <div
+              class="half"
+              [ngStyle]="{ color: item?.d > 0 ? '#198754' : '#dc3545' }"
+            >
+              <h3>{{ item.currentPrice | number : "1.2-2" }}</h3>
+              <span *ngIf="item?.d > 0">
+                <i class="bi bi-caret-up-fill"></i>
+              </span>
+              <span *ngIf="item?.d <= 0">
+                <i class="bi bi-caret-down-fill"></i>
+              </span>
+              <span
+                >{{ item?.d | number : "1.2-2" }} ({{
+                  item?.dp | number : "1.2-2"
+                }}%)</span
+              >
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <footer class="footer">
+    <nav class="navbar navbar-expand-lg navbar-light custom-navbar-footer-bg">
+      <div class="container-fluid d-flex justify-content-center">
+        <p class="footer-content mb-0">
+          Powered by
+          <a href="https://finnhub.com" target="_blank">Finnhub.io</a>
+        </p>
+      </div>
+    </nav>
+  </footer>
+</div>

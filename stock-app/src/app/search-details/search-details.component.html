@@ -1,0 +1,549 @@
+<div
+  class="col-lg-12 col-md-12 col-sm-6 text-center search-in-home"
+  style="margin: 0 auto"
+>
+  <app-home></app-home>
+</div>
+<div>
+  <div
+    class="row search-body-content justify-content-center align-items-center"
+  >
+    <div class="text-center stock-container">
+      <div class="col-lg-12 col-md-8 col-sm-4">
+        <div
+          *ngIf="isLoading"
+          style="
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-top: 3rem;
+          "
+        >
+          <mat-progress-spinner
+            mode="indeterminate"
+            diameter="50"
+          ></mat-progress-spinner>
+        </div>
+        <div *ngIf="!isLoading && showContainer">
+          <ngb-alert
+            *ngIf="alertVisible"
+            [type]="alertType"
+            [dismissible]="false"
+            class="custom-alert-home"
+            [style.background-color]="
+              alertType === 'buy' ? '#d7ebe1' : '#f9dcdf'
+            "
+          >
+            {{ alertMessage }}
+          </ngb-alert>
+
+          <div style="margin-top: 1%">
+            <div class="row">
+              <div class="col-5">
+                <div class="d-flex justify-content-center">
+                  <span
+                    ><h3>{{ companyData?.ticker }}</h3></span
+                  >
+
+                  <span *ngIf="!isStarFilled" (click)="toggleStar()">
+                    <i class="bi bi-star fs-5"></i>
+                  </span>
+
+                  <span *ngIf="isStarFilled" (click)="toggleStar()">
+                    <i class="bi bi-star-fill fs-5"></i>
+                  </span>
+                </div>
+                <h5>{{ companyData?.name }}</h5>
+                <p>{{ companyData?.exchange }}</p>
+                <button
+                  type="button"
+                  class="btn btn-success buy-botton"
+                  (click)="openBuyDialog()"
+                >
+                  Buy
+                </button>
+                <button
+                  type="button"
+                  class="btn btn-danger"
+                  (click)="openSellDialog()"
+                  *ngIf="quantityPurchased > 0"
+                >
+                  Sell
+                </button>
+              </div>
+
+              <div class="col-2">
+                <img
+                  [src]="companyData?.logo"
+                  alt="Symbol"
+                  class="company-logo"
+                />
+              </div>
+              <div class="col-5">
+                <h3
+                  [ngStyle]="{
+                    color: quoteData?.c < 0 ? '#198754' : '#dc3545'
+                  }"
+                >
+                  {{ quoteData?.c | number : "1.2-2" }}
+                </h3>
+
+                <div
+                  class="d-flex align-items-center justify-content-center"
+                  [ngStyle]="{
+                    color: quoteData?.c < 0 ? '#198754' : '#dc3545'
+                  }"
+                >
+                  <span *ngIf="quoteData?.d > 0">
+                    <i class="bi bi-caret-up-fill"></i>
+                  </span>
+                  <span *ngIf="quoteData?.d <= 0">
+                    <i class="bi bi-caret-down-fill"></i>
+                  </span>
+                  <span class="quotedata-company-summary"
+                    >{{ quoteData?.d | number : "1.2-2" }} ({{
+                      quoteData?.dp | number : "1.2-2"
+                    }}%)</span
+                  >
+                </div>
+
+                <p class="date-company-summary">
+                  {{ quoteData?.t * 1000 | date : "yyyy-MM-dd HH:mm:ss" }}
+                </p>
+              </div>
+
+              <p
+                *ngIf="marketIsOpen"
+                [ngStyle]="{
+                  color: marketIsOpen ? '#1a925f' : '#e23c50',
+                  'font-weight': 'bold'
+                }"
+              >
+                Market is Open
+              </p>
+              <p
+                *ngIf="!marketIsOpen"
+                [ngStyle]="{
+                  color: marketIsOpen ? '#1a925f' : '#e23c50',
+                  'font-weight': 'bold'
+                }"
+              >
+                Market closed on
+                {{ quoteData?.t * 1000 | date : "yyyy-MM-dd HH:mm:ss" }}
+              </p>
+              <ng-template #buyDialogTemplate let-data>
+                <div class="modal-header">
+                  <div class="header-content">
+                    <span class="modal-title">{{ companyData?.ticker }}</span>
+                    <button
+                      type="button"
+                      class="close"
+                      aria-label="Close"
+                      (click)="closeBuyDialog()"
+                    >
+                      <span aria-hidden="true">&times;</span>
+                    </button>
+                  </div>
+                </div>
+                <div class="modal-body">
+                  <p>Current Price: {{ quoteData?.c }}</p>
+                  <p>Money in Wallet: ${{ walletAmount | number : "1.2-2" }}</p>
+
+                  <span>Quantity:</span
+                  ><span>
+                    <input
+                      type="number"
+                      [(ngModel)]="buyQuantity"
+                      class="quantity-input"
+                  /></span>
+                  <p
+                    *ngIf="
+                      isBuyDisabled(quoteData?.c, buyQuantity) &&
+                      buyQuantity > 0
+                    "
+                    class="money-alert"
+                  >
+                    Not enough money in wallet!
+                  </p>
+                </div>
+                <div class="modal-footer buy-modal-footer">
+                  <span class="total-action"
+                    >Total:
+                    {{
+                      calculateTotal(quoteData?.c, buyQuantity)
+                        | number : "1.2-2"
+                    }}</span
+                  >
+                  <span class="buy-action">
+                    <button
+                      type="button"
+                      class="btn btn-success"
+                      (click)="
+                        buy(
+                          quoteData?.c,
+                          buyQuantity,
+                          calculateTotal(quoteData?.c, buyQuantity),
+                          companyData?.ticker,
+                          companyData?.name
+                        );
+                        closeBuyDialog()
+                      "
+                      [disabled]="isBuyDisabled(quoteData?.c, buyQuantity)"
+                    >
+                      Buy
+                    </button>
+                  </span>
+                </div>
+              </ng-template>
+
+              <ng-template #sellDialogTemplate let-data>
+                <div class="modal-header">
+                  <div class="header-content">
+                    <h4 class="modal-title">{{ companyData?.ticker }}</h4>
+                    <button
+                      type="button"
+                      class="close"
+                      aria-label="Close"
+                      (click)="closeSellDialog()"
+                    >
+                      <span aria-hidden="true">&times;</span>
+                    </button>
+                  </div>
+                </div>
+                <div class="modal-body">
+                  <p>Current Price: {{ quoteData?.c }}</p>
+                  <p>Money in Wallet: ${{ walletAmount | number : "1.2-2" }}</p>
+                  <p>
+                    Quantity:
+                    <input
+                      type="number"
+                      [(ngModel)]="sellQuantity"
+                      class="quantity-input"
+                    />
+                  </p>
+                  <p
+                    *ngIf="
+                      isSellDisabled(sellQuantity) &&
+                      sellQuantity > quantityPurchased
+                    "
+                    class="money-alert"
+                  >
+                    You cannot sell the stocks that you don't have!
+                  </p>
+                </div>
+                <div class="modal-footer buy-modal-footer">
+                  <span class="total-action"
+                    >Total: ${{
+                      calculateTotal(quoteData?.c, sellQuantity)
+                        | number : "1.2-2"
+                    }}</span
+                  >
+                  <span class="sell-action">
+                    <button
+                      type="button"
+                      class="btn btn-danger"
+                      (click)="
+                        sell(
+                          quoteData?.c,
+                          sellQuantity,
+                          calculateTotal(quoteData?.c, sellQuantity),
+                          companyData?.ticker
+                        );
+                        closeSellDialog()
+                      "
+                      [disabled]="isSellDisabled(sellQuantity)"
+                    >
+                      Sell
+                    </button>
+                  </span>
+                </div>
+              </ng-template>
+              <div class="tabs">
+                <mat-tab-group>
+                  <mat-tab label="Summary">
+                    <div class="summary-tab-content">
+                      <div class="row">
+                        <div class="col-md-6">
+                          <div
+                            class="d-flex flex-column justify-content-center responsive-company-tab"
+                          >
+                            <!-- <p>High Price:{{ quoteData?.h }}</p> -->
+                            <p>
+                              <span class="bold-text">High Price:</span>
+                              <span class="data">{{
+                                quoteData?.h | number : "1.2-2"
+                              }}</span>
+                            </p>
+
+                            <p>
+                              <span class="bold-text"> Low Price:</span>
+                              <span class="data">{{
+                                quoteData?.l | number : "1.2-2"
+                              }}</span>
+                            </p>
+                            <p>
+                              <span class="bold-text">Open Price:</span
+                              ><span class="data">{{
+                                quoteData?.o | number : "1.2-2"
+                              }}</span>
+                            </p>
+                            <p>
+                              <span class="bold-text">Prev. Close:</span
+                              ><span class="data">{{
+                                quoteData?.pc | number : "1.2-2"
+                              }}</span>
+                            </p>
+                          </div>
+                          <div
+                            d-flex
+                            flex-column
+                            align-items-center
+                            justify-content-center
+                            text-center
+                          >
+                            <h6
+                              style="
+                                text-decoration: underline;
+                                margin: 5%;
+                                font-size: 1.2rem;
+                              "
+                            >
+                              About the company
+                            </h6>
+                            <p class="company-middle-data">
+                              <span class="bold-text">IPO Start Date:</span>
+                              <span class="data">
+                                {{ companyData?.ipo | date : "yyyy-MM-dd" }}
+                              </span>
+                            </p>
+
+                            <p class="company-middle-data">
+                              <span class="bold-text">Industry:</span
+                              ><span class="data">{{
+                                companyData?.finnhubIndustry
+                              }}</span>
+                            </p>
+                            <p class="company-middle-data">
+                              <span class="bold-text">Webpage: </span>
+                              <span class="data">
+                                <a [href]="companyData?.weburl">{{
+                                  companyData?.weburl
+                                }}</a>
+                              </span>
+                            </p>
+                            <div class="company-middle-data">
+                              <p class="bold-text">Company Peers:</p>
+                              <span class="data">
+                                <span
+                                  *ngFor="
+                                    let peer of companyPeersData;
+                                    let last = last
+                                  "
+                                >
+                                  <!-- <a href="{{ peer }}">{{ peer }}</a> -->
+                                  <a [routerLink]="['/search', peer]">{{
+                                    peer
+                                  }}</a>
+                                  <ng-container *ngIf="!last">, </ng-container>
+                                </span>
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                        <div class="col-md-6">
+                          <highcharts-chart
+                            [Highcharts]="highchartsCompanySummaryData"
+                            [options]="chartOptionsCompanyChartsData"
+                            style="width: 100%; height: 350px; display: block"
+                          >
+                          </highcharts-chart>
+                        </div>
+                      </div>
+                    </div>
+                  </mat-tab>
+                  <mat-tab label="Top News">
+                    <div class="news-container" style="margin-bottom: 0.3%">
+                      <div
+                        class="news-item"
+                        *ngFor="let news of newsData"
+                        (click)="openNewsDialog(news)"
+                      >
+                        <img [src]="news.image" class="news-image" />
+                        <div class="news-content">
+                          <p>{{ news.headline }}</p>
+                        </div>
+                      </div>
+                    </div>
+
+                    <ng-template #newsDialogTemplate>
+                      <div class="modal-header">
+                        <div class="header-content">
+                          <span class="source">
+                            <p>{{ selectedNewsArticle[0]?.source }}</p></span
+                          >
+                          <button
+                            type="button"
+                            class="close"
+                            aria-label="Close"
+                            (click)="closeNewsDialog()"
+                          >
+                            <span aria-hidden="true">&times;</span>
+                          </button>
+                        </div>
+                        <div>
+                          <!-- {{ selectedNewsArticle[0]?.datetime }} -->
+                          <span class="datetime">{{
+                            getDate(selectedNewsArticle[0]?.datetime)
+                          }}</span>
+                        </div>
+                      </div>
+
+                      <div class="modal-body">
+                        <p>
+                          <strong>{{
+                            selectedNewsArticle[0]?.headline
+                          }}</strong>
+                        </p>
+                        <p class="summary">
+                          {{ selectedNewsArticle[0]?.summary }}
+                        </p>
+                        <p style="color: #747474">
+                          For more details, click
+                          <a [href]="selectedNewsArticle[0].url" target="_blank"
+                            >here</a
+                          >
+                        </p>
+                      </div>
+
+                      <div class="news-modal-footer">
+                        <p class="share-text">Share</p>
+                        <div class="social-media-links">
+                          <a
+                            class="twitter-share-button"
+                            [href]="
+                              generateTwitterShareUrl(
+                                selectedNewsArticle[0].headline,
+                                selectedNewsArticle[0].url
+                              )
+                            "
+                            target="_blank"
+                          >
+                            <i class="bi bi-twitter-x twitter-icon"></i>
+                          </a>
+
+                          <a
+                            href="#"
+                            (click)="
+                              shareOnFacebook(selectedNewsArticle[0].url)
+                            "
+                          >
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              viewBox="0 0 448 512"
+                              class="facebook-icon"
+                            >
+                              <rect width="100%" height="100%" fill="#ffffff" />
+                              <path
+                                fill="#140bef"
+                                d="M64 32C28.7 32 0 60.7 0 96V416c0 35.3 28.7 64 64 64h98.2V334.2H109.4V256h52.8V222.3c0-87.1 39.4-127.5 125-127.5c16.2 0 44.2 3.2 55.7 6.4V172c-6-.6-16.5-1-29.6-1c-42 0-58.2 15.9-58.2 57.2V256h83.6l-14.4 78.2H255V480H384c35.3 0 64-28.7 64-64V96c0-35.3-28.7-64-64-64H64z"
+                              />
+                            </svg>
+                          </a>
+                        </div>
+                      </div>
+                    </ng-template>
+                  </mat-tab>
+                  <mat-tab label="Charts">
+                    <highcharts-chart
+                      [Highcharts]="highchartsChartsTabData"
+                      [options]="chartOptionsChartTabData"
+                      style="width: 100%; height: 600px; display: block"
+                    >
+                    </highcharts-chart>
+                  </mat-tab>
+                  <mat-tab label="Insights">
+                    <div class="row" style="margin-top: 0.8rem">
+                      <div class="col">
+                        <p class="text-center insider-sentiments-text">
+                          Insider Sentiments
+                        </p>
+
+                        <div class="insights-table-container">
+                          <table class="table">
+                            <tr>
+                              <th>{{ companyData?.name }}</th>
+                              <th>MSPR</th>
+                              <th>Change</th>
+                            </tr>
+                            <tr>
+                              <th>Total</th>
+                              <td class="insights-table-data">
+                                {{ averageMspr | number : "1.2-2" }}
+                              </td>
+
+                              <td class="insights-table-data">
+                                {{ averageChange | number : "1.2-2" }}
+                              </td>
+                            </tr>
+                            <tr>
+                              <th>Positive</th>
+                              <td class="insights-table-data">
+                                {{ averagePositiveMspr | number : "1.2-2" }}
+                              </td>
+                              <td class="insights-table-data">
+                                {{ averagePositiveChange | number : "1.2-2" }}
+                              </td>
+                            </tr>
+                            <tr>
+                              <th>Negative</th>
+                              <td class="insights-table-data">
+                                {{ averageNegativeMspr | number : "1.2-2" }}
+                              </td>
+                              <td class="insights-table-data">
+                                {{ averageNegativeChange | number : "1.2-2" }}
+                              </td>
+                            </tr>
+                          </table>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="row">
+                      <div class="col-md-6 col-sm-12">
+                        <highcharts-chart
+                          [Highcharts]="highchartsRecommendationTrends"
+                          [options]="chartOptionsRecommendationTrends"
+                          style="width: 100%; height: 400px; display: block"
+                        >
+                        </highcharts-chart>
+                      </div>
+
+                      <div class="col-md-6 col-sm-12">
+                        <highcharts-chart
+                          [Highcharts]="highchartsCompanyEarningsData"
+                          [options]="chartOptionsCompanyEarningsData"
+                          style="width: 100%; height: 400px; display: block"
+                        >
+                        </highcharts-chart>
+                      </div>
+                    </div>
+                  </mat-tab>
+                </mat-tab-group>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <footer class="footer" *ngIf="!isLoading">
+    <nav class="navbar navbar-expand-lg navbar-light custom-navbar-footer-bg">
+      <div class="container-fluid d-flex justify-content-center">
+        <p class="footer-content mb-0">
+          Powered by
+          <a href="https://finnhub.com" target="_blank">Finnhub.io</a>
+        </p>
+      </div>
+    </nav>
+  </footer>
+</div>

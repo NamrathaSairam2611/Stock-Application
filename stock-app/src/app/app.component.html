@@ -1,0 +1,46 @@
+<div class="body-content">
+  <nav class="navbar navbar-expand-lg navbar-light custom-navbar-bg">
+    <a
+      class="navbar-brand stock-search-heading"
+      href="/search/home"
+      (click)="navigateToHomeFromApp()"
+      >Stock Search</a
+    >
+    <button
+      class="navbar-toggler"
+      type="button"
+      data-bs-toggle="collapse"
+      data-bs-target="#navbarNav"
+      aria-controls="navbarNav"
+      aria-expanded="false"
+      aria-label="Toggle
+    navigation"
+    >
+      <span class="navbar-toggler-icon .custom-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <ul class="navbar-nav ms-auto">
+        <li class="nav-item" [class.active]="activeLink === 'search'">
+          <a class="nav-link" (click)="navigateToSearchFromApp()">Search</a>
+        </li>
+        <li class="nav-item" [class.active]="activeLink === 'watchlist'">
+          <a class="nav-link" (click)="navigateToWatchlist()">Watchlist</a>
+        </li>
+        <li class="nav-item" [class.active]="activeLink === 'portfolio'">
+          <a class="nav-link" (click)="navigateToPortfolio()">Portfolio</a>
+        </li>
+      </ul>
+    </div>
+  </nav>
+  <router-outlet></router-outlet>
+  <!-- <footer class="footer">
+    <nav class="navbar navbar-expand-lg navbar-light custom-navbar-footer-bg">
+      <div class="container-fluid d-flex justify-content-center">
+        <p class="footer-content mb-0">
+          Powered by
+          <a href="https://finnhub.com" target="_blank">Finnhub.io</a>
+        </p>
+      </div>
+    </nav>
+  </footer> -->
+</div>

@@ -1,0 +1,78 @@
+<div>
+  <div
+    class="row search-body-content justify-content-center align-items-center"
+  >
+    <div class="text-center">
+      <p class="stock-search-heading">STOCK SEARCH</p>
+      <form
+        class="col-lg-4 col-md-8 col-sm-8 text-center"
+        style="margin: 0 auto"
+      >
+        <div class="flex-container">
+          <mat-form-field class="search-field">
+            <span>
+              <input
+                matInput
+                class="form-control custom-input"
+                type="text"
+                placeholder="Enter Stock Ticker Symbol"
+                [matAutocomplete]="auto"
+                [formControl]="searchControl"
+              />
+            </span>
+            <span class="icon-container">
+              <i
+                class="fas fa-search search-icon"
+                (click)="optionSelected()"
+              ></i>
+              <i
+                class="fas fa-times close-icon"
+                (click)="navigateToSearchHome()"
+              ></i>
+            </span>
+            <mat-autocomplete
+              #auto="matAutocomplete"
+              (optionSelected)="optionSelected()"
+            >
+              <mat-option *ngIf="isLoading">
+                <mat-progress-spinner
+                  mode="indeterminate"
+                  diameter="20"
+                ></mat-progress-spinner>
+              </mat-option>
+              <mat-option
+                *ngFor="let option of filteredSearchOptions | async"
+                [value]="option"
+                (click)="logOption(option)"
+              >
+                {{ option.description }}
+              </mat-option>
+            </mat-autocomplete>
+          </mat-form-field>
+        </div>
+
+        <!-- </div> -->
+      </form>
+
+      <ngb-alert
+        *ngIf="alertVisible"
+        [type]="alertType"
+        class="custom-alert-home"
+        [style.background-color]="alertType === 'buy' ? '#d7ebe1' : '#f9dcdf'"
+        [dismissible]="false"
+      >
+        {{ alertMessage }}
+      </ngb-alert>
+    </div>
+  </div>
+  <footer class="footer" *ngIf="isHomeRoute()">
+    <nav class="navbar navbar-expand-lg navbar-light custom-navbar-footer-bg">
+      <div class="container-fluid d-flex justify-content-center">
+        <p class="footer-content mb-0">
+          Powered by
+          <a href="https://finnhub.com" target="_blank">Finnhub.io</a>
+        </p>
+      </div>
+    </nav>
+  </footer>
+</div>

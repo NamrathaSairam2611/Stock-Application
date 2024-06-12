@@ -1,0 +1,11 @@
+runtime: nodejs18
+
+handlers:
+  - url: /
+    static_files: dist/stock-app/index.html
+    upload: dist/stock-app/index.html
+    http_headers:
+      Access-Control-Allow-Origin: "*"
+
+  - url: /
+    static_dir: dist/stock-app
